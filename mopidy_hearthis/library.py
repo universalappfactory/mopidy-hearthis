@@ -1,9 +1,10 @@
 import logging
 import traceback
 from typing import List
-from mopidy import backend, models
-from .hearthis_search import HearThisLibrary
 
+from mopidy import backend, models
+
+from .hearthis_search import HearThisLibrary
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +13,9 @@ class HearthisLibraryProvider(backend.LibraryProvider):
     """Library for searching via hearthis.at api"""
 
     ROOT_DIRECTORY_URI = "hearthis:root"
-    root_directory = models.Ref.directory(uri=ROOT_DIRECTORY_URI, name="Hearthis music community")
+    root_directory = models.Ref.directory(
+        uri=ROOT_DIRECTORY_URI, name="Hearthis music community"
+    )
 
     def __init__(self, backend, config):
         super().__init__(backend)

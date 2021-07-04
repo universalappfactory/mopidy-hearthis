@@ -1,9 +1,9 @@
 import logging
 import pathlib
+
 from mopidy import config, ext
 
 __version__ = "0.1.3"
-
 logger = logging.getLogger(__name__)
 
 
@@ -24,4 +24,5 @@ class Extension(ext.Extension):
 
     def setup(self, registry):
         from .backend import HeartthisBackend
+
         registry.add("backend", HeartthisBackend)

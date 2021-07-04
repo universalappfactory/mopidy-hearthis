@@ -1,13 +1,13 @@
-import logging
 import asyncio
+import logging
 import re
-from mopidy import models
-import aiohttp
-from pyhearthis.hearthis import HearThis, FeedType
-from pyhearthis.models import Category, SingleTrack
 import traceback
 from typing import List, NamedTuple, Tuple
 
+import aiohttp
+from mopidy import models
+from pyhearthis.hearthis import FeedType, HearThis
+from pyhearthis.models import Category, SingleTrack
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +55,7 @@ def create_track_url(track_or_track_id) -> str:
     return f"hearthis:track:{track_or_track_id}"
 
 
-class HearThisLibrary():
-
+class HearThisLibrary:
     def __init__(self, username, password):
         self._username = username
         self._password = password
@@ -81,7 +80,9 @@ class HearThisLibrary():
     async def _get_feed_async(self, user, feed_type: FeedType):
         async with aiohttp.ClientSession() as session:
             hearthis = HearThis(session)
-            return await hearthis.get_feeds(user, feed_type=feed_type, page=1, count=20)
+            return await hearthis.get_feeds(
+                user, feed_type=feed_type, page=1, count=20
+            )
 
     async def _get_tracks_from_category_async(self, user, category: Category):
         async with aiohttp.ClientSession() as session:
@@ -105,16 +106,23 @@ class HearThisLibrary():
             return await hearthis.get_artist_tracks(user, artist_permalink)
 
     def _get_artist_tracks(self, user, artist_permalink: str):
-        return asyncio.run(self._get_artist_tracks_async(user, artist_permalink))
+        return asyncio.run(
+            self._get_artist_tracks_async(user, artist_permalink)
+        )
 
     def _track_as_ref(self, item: Tuple[ArtistTuple, TrackTuple]) -> models.Ref:
         track_tuple = self._cache.get_track(item[1].single_track.stream_url)
         if track_tuple is None:
             raise TrackNotFound()
 
-        return models.Ref.track(uri=create_track_url(track_tuple.single_track), name=track_tuple.single_track.title)
+        return models.Ref.track(
+            uri=create_track_url(track_tuple.single_track),
+            name=track_tuple.single_track.title,
+        )
 
-    def _as_ref(self, track_models: List[Tuple[ArtistTuple, TrackTuple]]) -> List[models.Ref]:
+    def _as_ref(
+        self, track_models: List[Tuple[ArtistTuple, TrackTuple]]
+    ) -> List[models.Ref]:
         return list(map(self._track_as_ref, track_models))
 
     def _search(self, user, query) -> List[SingleTrack]:
@@ -127,13 +135,21 @@ class HearThisLibrary():
         result = []
 
         if parent is None:
-            result.append(models.Ref.directory(uri="hearthis:feed", name="Feed"))
+            result.append(
+                models.Ref.directory(uri="hearthis:feed", name="Feed")
+            )
 
         if parent is None:
-            result.append(models.Ref.directory(uri="hearthis:categories", name="Categories"))
+            result.append(
+                models.Ref.directory(
+                    uri="hearthis:categories", name="Categories"
+                )
+            )
 
         if parent is None:
-            result.append(models.Ref.directory(uri="hearthis:news", name="News"))
+            result.append(
+                models.Ref.directory(uri="hearthis:news", name="News")
+            )
 
         return result
 
@@ -170,7 +186,9 @@ class HearThisLibrary():
         track_tuple = self._cache.get_track_by_ref_url(uri)
         return [track_tuple.model_track]
 
-    def get_feed(self, feed_type: FeedType = FeedType.UNDEFINED) -> List[models.Ref]:
+    def get_feed(
+        self, feed_type: FeedType = FeedType.UNDEFINED
+    ) -> List[models.Ref]:
         user = self._get_user()
         tracks = self._get_feed(user, feed_type)
         track_models = ModelFactory.create_track_models(tracks)
@@ -189,10 +207,16 @@ class HearThisLibrary():
             models = ModelFactory.create_track_models(artist_tracks)
             self._cache.add_models(models, True)
 
-        result = list(map(lambda t: t.model_track, self._cache.get_artist_tracks(str(uri))))
+        result = list(
+            map(
+                lambda t: t.model_track, self._cache.get_artist_tracks(str(uri))
+            )
+        )
         return result if result is not None else []
 
-    def _create_search_result(self, url: str, items: List[Tuple[ArtistTuple, TrackTuple]]):
+    def _create_search_result(
+        self, url: str, items: List[Tuple[ArtistTuple, TrackTuple]]
+    ):
         artist_list = []
         track_list = []
         album_list = []
@@ -201,7 +225,9 @@ class HearThisLibrary():
             artist_list.append(item[0].model_artist)
             track_list.append(item[1].model_track)
 
-        return models.SearchResult(uri=url, albums=album_list, artists=artist_list, tracks=track_list)
+        return models.SearchResult(
+            uri=url, albums=album_list, artists=artist_list, tracks=track_list
+        )
 
     def search(self, query) -> models.SearchResult:
         try:
@@ -220,8 +246,7 @@ class HearThisLibrary():
         return None
 
 
-class ModelCache():
-
+class ModelCache:
     def __init__(self) -> None:
         self._tracks_stream_url = {}
         self._tracks_ref_url = {}
@@ -229,7 +254,11 @@ class ModelCache():
         self._artists = {}
         self._categories = {}
 
-    def add_model(self, model: Tuple[ArtistTuple, TrackTuple], complete_artist_tracks: bool = False):
+    def add_model(
+        self,
+        model: Tuple[ArtistTuple, TrackTuple],
+        complete_artist_tracks: bool = False,
+    ):
         if not model[1].single_track.stream_url in self._tracks_stream_url:
             self._tracks_stream_url[model[1].single_track.stream_url] = model
 
@@ -242,12 +271,19 @@ class ModelCache():
             self._artist_tracks[artist_url] = (complete_artist_tracks, [model])
         else:
             tmp = self._artist_tracks[artist_url]
-            self._artist_tracks[artist_url] = (complete_artist_tracks, [*tmp[1], model])
+            self._artist_tracks[artist_url] = (
+                complete_artist_tracks,
+                [*tmp[1], model],
+            )
 
         if artist_url not in self._artists:
             self._artists[artist_url] = model[0]
 
-    def add_models(self, models: List[Tuple[ArtistTuple, TrackTuple]], complete_artist_tracks: bool = False) -> None:
+    def add_models(
+        self,
+        models: List[Tuple[ArtistTuple, TrackTuple]],
+        complete_artist_tracks: bool = False,
+    ) -> None:
         for model in models:
             self.add_model(model, complete_artist_tracks)
 
@@ -297,20 +333,42 @@ class ModelCache():
         return None
 
 
-class ModelFactory():
-
+class ModelFactory:
     @staticmethod
     def _create_track(track: SingleTrack) -> Tuple[ArtistTuple, TrackTuple]:
         artist_url = create_artist_url(track)
         artist_name = track.user.username
-        artist_tuple = ArtistTuple(artist_url, None, models.Artist(uri=artist_url, name=artist_name), None)
-        track_tuple = TrackTuple(track.stream_url, create_track_url(track), models.Track(name=track.title, uri=track.stream_url, artists=[artist_tuple.model_artist]), track)
+        artist_tuple = ArtistTuple(
+            artist_url,
+            None,
+            models.Artist(uri=artist_url, name=artist_name),
+            None,
+        )
+        track_tuple = TrackTuple(
+            track.stream_url,
+            create_track_url(track),
+            models.Track(
+                name=track.title,
+                uri=track.stream_url,
+                artists=[artist_tuple.model_artist],
+            ),
+            track,
+        )
         return (artist_tuple, track_tuple)
 
     @staticmethod
-    def create_track_models(tracks: List[SingleTrack]) -> List[Tuple[ArtistTuple, TrackTuple]]:
+    def create_track_models(
+        tracks: List[SingleTrack],
+    ) -> List[Tuple[ArtistTuple, TrackTuple]]:
         return list(map(ModelFactory._create_track, tracks))
 
     @staticmethod
     def create_directory_refs(categories: List[Category]):
-        return list(map(lambda cat: models.Ref.directory(uri=f"hearthis:categories:{cat.id}", name=cat.name), categories))
+        return list(
+            map(
+                lambda cat: models.Ref.directory(
+                    uri=f"hearthis:categories:{cat.id}", name=cat.name
+                ),
+                categories,
+            )
+        )

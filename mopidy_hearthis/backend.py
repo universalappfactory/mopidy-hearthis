@@ -1,6 +1,8 @@
 import logging
+
 import pykka
 from mopidy import backend
+
 from .library import HearthisLibraryProvider
 
 logger = logging.getLogger(__name__)

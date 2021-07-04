@@ -1,7 +1,9 @@
+from datetime import datetime
+
+from pyhearthis.models import SingleTrack, User
+
 from mopidy_hearthis import Extension
 from mopidy_hearthis.hearthis_search import ModelCache, ModelFactory
-from pyhearthis.models import SingleTrack, User
-from datetime import datetime
 
 
 def test_get_default_config():
@@ -25,7 +27,51 @@ def test_get_config_schema():
 def create_track(id, user_id, title) -> SingleTrack:
     dt = datetime(2021, 2, 2)
     user = User(user_id, "", "", "", "", "", "")
-    return SingleTrack(id, dt, 0, None, None, "", user_id, 0, "", "", 1, "", "", title, "uri", "permalink", "thumb", "artwork", "background", "wave", "wave_url", user, "strean_url", "download", 1, 1, 1, False, 1, "", "", 1, "", "type", "license", "versio", "", "", "", 1, False, False, False)
+    return SingleTrack(
+        id,
+        dt,
+        0,
+        None,
+        None,
+        "",
+        user_id,
+        0,
+        "",
+        "",
+        1,
+        "",
+        "",
+        title,
+        "uri",
+        "permalink",
+        "thumb",
+        "artwork",
+        "background",
+        "wave",
+        "wave_url",
+        user,
+        "strean_url",
+        "download",
+        1,
+        1,
+        1,
+        False,
+        1,
+        "",
+        "",
+        1,
+        "",
+        "type",
+        "license",
+        "versio",
+        "",
+        "",
+        "",
+        1,
+        False,
+        False,
+        False,
+    )
 
 
 def test_that_modelfactory_creates_expected_result():
