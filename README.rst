@@ -34,7 +34,13 @@ Before starting Mopidy, you must add configuration for
 Mopidy-Hearthis to your Mopidy configuration file::
 
     [hearthis]
-    # TODO: Add example of extension config
+    enabled: True
+    username: your_hearthis_username
+    password: your_hearthis_password
+
+You can obtain a login here Hearthis_.
+
+At the moment you need to have an email and password as login, the other login methods provided by HearThis_ are not yet supported.
 
 
 Project resources
@@ -51,3 +57,5 @@ Credits
 - Original author: `universalappfactory <https://github.com/universalappfactory>`__
 - Current maintainer: `universalappfactory <https://github.com/universalappfactory>`__
 - `Contributors <https://github.com/universalappfactory/mopidy-hearthis/graphs/contributors>`_
+
+.. _HearThis: https://hearthis.at/

@@ -108,7 +108,6 @@ class HearThisLibrary():
         return asyncio.run(self._get_artist_tracks_async(user, artist_permalink))
 
     def _track_as_ref(self, item: Tuple[ArtistTuple, TrackTuple]) -> models.Ref:
-        logger.error(item[1].single_track.stream_url)
         track_tuple = self._cache.get_track(item[1].single_track.stream_url)
         if track_tuple is None:
             raise TrackNotFound()
@@ -163,7 +162,7 @@ class HearThisLibrary():
 
     def lookup_categories(self, uri) -> List[models.Track]:
         # ToDo
-        logger.error("lookup_categories")
+        logger.debug("TODO lookup_categories")
         return []
 
     def lookup_track(self, uri) -> List[models.Track]:
@@ -184,7 +183,6 @@ class HearThisLibrary():
     def get_artist_tracks(self, uri):
 
         if not self._cache.artist_tracks_complete(uri):
-            logger.warn("fetch artisttracks")
             user = self._get_user()
             artist = self._cache.get_artist(uri)
             artist_tracks = self._get_artist_tracks(user, artist.permalink)
@@ -192,11 +190,7 @@ class HearThisLibrary():
             self._cache.add_models(models, True)
 
         result = list(map(lambda t: t.model_track, self._cache.get_artist_tracks(str(uri))))
-        if not result:
-            logger.error("NO ARTIST")
-            return []
-
-        return result
+        return result if result is not None else []
 
     def _create_search_result(self, url: str, items: List[Tuple[ArtistTuple, TrackTuple]]):
         artist_list = []
@@ -221,9 +215,7 @@ class HearThisLibrary():
             return self._create_search_result(url, models)
         except Exception as e:
             traceback.print_exc()
-            logger.error(e)
-            if hasattr(e, 'message'):
-                logger.error(e.message)
+            logger.exception(e)
 
         return None
 
