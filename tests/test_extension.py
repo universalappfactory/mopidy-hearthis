@@ -1,5 +1,4 @@
 from mopidy_hearthis import Extension
-# from mopidy_hearthis import frontend as frontend_lib
 from mopidy_hearthis.hearthis_search import ModelCache, ModelFactory
 from pyhearthis.models import SingleTrack, User
 from datetime import datetime
