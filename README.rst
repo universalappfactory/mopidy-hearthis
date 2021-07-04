@@ -14,7 +14,11 @@ Mopidy-Hearthis
     :target: https://codecov.io/gh/universalappfactory/mopidy-hearthis
     :alt: Test coverage
 
-A mopidy backend to stream music from hearthis.at
+A mopidy backend to stream music from hearthis.at.
+
+Still at an early state but already working.
+Results from hearthis.at are not paged yet so results are limited to 20 Tracks at the moment.
+
 
 
 Installation
@@ -23,8 +27,6 @@ Installation
 Install by running::
 
     python3 -m pip install Mopidy-Hearthis
-
-See https://mopidy.com/ext/hearthis/ for alternative installation methods.
 
 
 Configuration
