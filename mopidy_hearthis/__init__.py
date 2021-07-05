@@ -3,7 +3,7 @@ import pathlib
 
 from mopidy import config, ext
 
-__version__ = "0.1.6"
+__version__ = "0.1.7"
 logger = logging.getLogger(__name__)
 
 
