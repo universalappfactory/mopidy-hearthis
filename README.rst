@@ -36,7 +36,7 @@ Before starting Mopidy, you must add configuration for
 Mopidy-Hearthis to your Mopidy configuration file::
 
     [hearthis]
-    enabled: True
+    enabled: true
     username: your_hearthis_username
     password: your_hearthis_password
 

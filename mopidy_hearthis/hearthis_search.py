@@ -61,6 +61,7 @@ class HearThisLibrary:
         self._password = password
         self._user = None
         self._cache = ModelCache()
+        self._page_count = 20
 
     def _get_user(self):
         if self._user is None:
@@ -84,13 +85,14 @@ class HearThisLibrary:
                 user, feed_type=feed_type, page=1, count=20
             )
 
-    async def _get_tracks_from_category_async(self, user, category: Category):
+    async def _get_tracks_from_category_async(self, user, category: Category, page=1):
         async with aiohttp.ClientSession() as session:
             hearthis = HearThis(session)
-            return await hearthis.get_category_tracks(user, category, 1, 20)
+            logger.warn(f"get_category_tracks page: {page} - count: {self._page_count}")
+            return await hearthis.get_category_tracks(user, category, page, self._page_count)
 
-    def _get_tracks_from_category(self, user, category: Category):
-        return asyncio.run(self._get_tracks_from_category_async(user, category))
+    def _get_tracks_from_category(self, user, category: Category, page=1):
+        return asyncio.run(self._get_tracks_from_category_async(user, category, page))
 
     async def _get_categories_async(self):
         async with aiohttp.ClientSession() as session:
@@ -154,16 +156,29 @@ class HearThisLibrary:
         return result
 
     def get_categories(self, uri) -> List[models.Ref]:
-        result = re.match("hearthis:categories:(.*)?", uri)
+        result = re.match("hearthis:categories:(_[p,n]\\:)?(.[a-z]+)\\:?(\\d+)?.*", uri)
 
         user = self._get_user()
-        if result and result.group(1):
-            category = self._cache.get_category(result.group(1))
+        if result and result.group(2):
+            # command = result.group(1)
+            page = int(result.group(3)) if result.group(3) else 1
+
+            category = self._cache.get_category(result.group(2))
             if category:
-                tracks = self._get_tracks_from_category(user, category)
+                if page:
+                    tracks = self._get_tracks_from_category(user, category, page)
+                else:
+                    tracks = self._get_tracks_from_category(user, category)
+
                 track_models = ModelFactory.create_track_models(tracks)
                 self._cache.add_models(track_models)
-                return self._as_ref(track_models)
+                refs = self._as_ref(track_models)
+                if page > 1:
+                    prev_page = page - 1
+                    refs.append(models.Ref.directory(uri=f"hearthis:categories:_p:{category.id}:{prev_page}", name=f"Page {prev_page}"))
+
+                refs.append(models.Ref.directory(uri=f"hearthis:categories:_n:{category.id}:{page+1}", name=f"Page {page + 1}"))
+                return refs
 
             return None
         else:
