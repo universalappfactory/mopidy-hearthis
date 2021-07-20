@@ -55,6 +55,18 @@ def create_track_url(track_or_track_id) -> str:
     return f"hearthis:track:{track_or_track_id}"
 
 
+def pad_zero(value):
+
+    if isinstance(value, int):
+        if value < 10:
+            return f"0{value}"
+        return f"{value}"
+
+    if len(value) > 1:
+        return f"0{value}"
+    return value
+
+
 class HearThisLibrary:
     def __init__(self, username, password):
         self._username = username
@@ -175,9 +187,9 @@ class HearThisLibrary:
                 refs = self._as_ref(track_models)
                 if page > 1:
                     prev_page = page - 1
-                    refs.append(models.Ref.directory(uri=f"hearthis:categories:_p:{category.id}:{prev_page}", name=f"Page {prev_page}"))
+                    refs.append(models.Ref.directory(uri=f"hearthis:categories:_p:{category.id}:{prev_page}", name=f"Page {pad_zero(prev_page)}"))
 
-                refs.append(models.Ref.directory(uri=f"hearthis:categories:_n:{category.id}:{page+1}", name=f"Page {page + 1}"))
+                refs.append(models.Ref.directory(uri=f"hearthis:categories:_n:{category.id}:{page+1}", name=f"Page {pad_zero(page + 1)}"))
                 return refs
 
             return None
