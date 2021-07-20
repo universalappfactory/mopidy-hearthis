@@ -29,11 +29,11 @@ class HearthisLibraryProvider(backend.LibraryProvider):
             if uri == "hearthis:root":
                 return self._hearthis_search.browse()
 
-            if uri == "hearthis:feed":
-                return self._hearthis_search.get_feed()
+            if uri.startswith("hearthis:feed"):
+                return self._hearthis_search.get_feed_paged(uri)
 
-            if uri == "hearthis:news":
-                return self._hearthis_search.get_news()
+            if uri.startswith("hearthis:news"):
+                return self._hearthis_search.get_news(uri)
 
             if str(uri).startswith("hearthis:categories"):
                 return self._hearthis_search.get_categories(str(uri))
@@ -65,17 +65,14 @@ class HearthisLibraryProvider(backend.LibraryProvider):
 
     def search(self, query=None, uris=None, exact=False):
         if "any" in query:
-            logger.warn("ANY")
             any_query = query["any"]
             return self._hearthis_search.search(str(any_query[0]))
 
         if "album" in query:
-            logger.warn("ALBUM")
             album_query = query["album"]
             return self._hearthis_search.search(str(album_query[0]))
 
         if "artist" in query:
-            logger.warn("ARTIST")
             artist_query = query["artist"]
             return self._hearthis_search.search(str(artist_query[0]))
 
