@@ -16,8 +16,9 @@ Mopidy-Hearthis
 
 A mopidy backend to stream music from hearthis.at.
 
-Still at an early state but already working.
-Results from hearthis.at are not paged yet so results are limited to 20 Tracks at the moment.
+Still under development but already works.
+Paging when browsing is now supported.
+The searchresult is still limited to one page (20 entries).
 
 
 
