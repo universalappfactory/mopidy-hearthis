@@ -67,12 +67,25 @@ def pad_zero(value):
     return value
 
 
-def with_page_folders(items: List[models.Ref], prefix, current_page: int) -> List[models.Ref]:
-    items.insert(0, models.Ref.directory(uri=f"{prefix}:{current_page+1}", name=f"Page {pad_zero(current_page + 1)}"))
+def with_page_folders(
+    items: List[models.Ref], prefix, current_page: int
+) -> List[models.Ref]:
+    items.insert(
+        0,
+        models.Ref.directory(
+            uri=f"{prefix}:{current_page+1}",
+            name=f"Page {pad_zero(current_page + 1)}",
+        ),
+    )
 
     if current_page > 1:
         prev_page = current_page - 1
-        items.insert(0, models.Ref.directory(uri=f"{prefix}:{prev_page}", name=f"Page {pad_zero(prev_page)}"))
+        items.insert(
+            0,
+            models.Ref.directory(
+                uri=f"{prefix}:{prev_page}", name=f"Page {pad_zero(prev_page)}"
+            ),
+        )
 
     return items
 
@@ -107,13 +120,19 @@ class HearThisLibrary:
                 user, feed_type=feed_type, page=page, count=self._page_count
             )
 
-    async def _get_tracks_from_category_async(self, user, category: Category, page=1):
+    async def _get_tracks_from_category_async(
+        self, user, category: Category, page=1
+    ):
         async with aiohttp.ClientSession() as session:
             hearthis = HearThis(session)
-            return await hearthis.get_category_tracks(user, category, page, self._page_count)
+            return await hearthis.get_category_tracks(
+                user, category, page, self._page_count
+            )
 
     def _get_tracks_from_category(self, user, category: Category, page=1):
-        return asyncio.run(self._get_tracks_from_category_async(user, category, page))
+        return asyncio.run(
+            self._get_tracks_from_category_async(user, category, page)
+        )
 
     async def _get_categories_async(self):
         async with aiohttp.ClientSession() as session:
@@ -177,7 +196,9 @@ class HearThisLibrary:
         return result
 
     def get_categories(self, uri) -> List[models.Ref]:
-        result = re.match("hearthis:categories:(_[p]\\:)?(.[a-z]+)\\:?(\\d+)?.*", uri)
+        result = re.match(
+            "hearthis:categories:(_[p]\\:)?(.[a-z]+)\\:?(\\d+)?.*", uri
+        )
 
         user = self._get_user()
         if result and result.group(2):
@@ -185,14 +206,18 @@ class HearThisLibrary:
             category = self._cache.get_category(result.group(2))
             if category:
                 if page:
-                    tracks = self._get_tracks_from_category(user, category, page)
+                    tracks = self._get_tracks_from_category(
+                        user, category, page
+                    )
                 else:
                     tracks = self._get_tracks_from_category(user, category)
 
                 track_models = ModelFactory.create_track_models(tracks)
                 self._cache.add_models(track_models)
                 refs = self._as_ref(track_models)
-                return with_page_folders(refs, f"hearthis:categories:_p:{category.id}", page)
+                return with_page_folders(
+                    refs, f"hearthis:categories:_p:{category.id}", page
+                )
 
             return None
         else:
@@ -216,8 +241,7 @@ class HearThisLibrary:
         return [track_tuple.model_track]
 
     def get_feed(
-        self, feed_type: FeedType = FeedType.UNDEFINED,
-        page=1
+        self, feed_type: FeedType = FeedType.UNDEFINED, page=1
     ) -> List[models.Ref]:
         user = self._get_user()
         tracks = self._get_feed(user, feed_type, page)
@@ -228,14 +252,24 @@ class HearThisLibrary:
     def get_feed_paged(self, uri):
         page_result = re.match("hearthis\\:feed\\:(\\d+)?", uri)
         if page_result and page_result.group(1):
-            return with_page_folders(self.get_feed(FeedType.UNDEFINED, int(page_result.group(1))), "hearthis:feed", int(page_result.group(1)))
+            return with_page_folders(
+                self.get_feed(FeedType.UNDEFINED, int(page_result.group(1))),
+                "hearthis:feed",
+                int(page_result.group(1)),
+            )
         return with_page_folders(self.get_feed(), "hearthis:feed", 1)
 
     def get_news(self, uri) -> List[models.Ref]:
         page_result = re.match("hearthis\\:news\\:(\\d+)?", uri)
         if page_result and page_result.group(1):
-            return with_page_folders(self.get_feed(FeedType.NEW, int(page_result.group(1))), "hearthis:news", int(page_result.group(1)))
-        return with_page_folders(self.get_feed(FeedType.NEW), "hearthis:news", 1)
+            return with_page_folders(
+                self.get_feed(FeedType.NEW, int(page_result.group(1))),
+                "hearthis:news",
+                int(page_result.group(1)),
+            )
+        return with_page_folders(
+            self.get_feed(FeedType.NEW), "hearthis:news", 1
+        )
 
     def get_artist_tracks(self, uri):
 
